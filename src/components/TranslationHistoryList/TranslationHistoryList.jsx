@@ -4,7 +4,7 @@ const TranslationHistoryList = ({
   translationHistory,
 }) => {
   const handleClick = () => {
-    localStorage.removeItem("saved");
+    localStorage.removeItem("translationHistory");
     setTranslationHistory([]);
   };
 
