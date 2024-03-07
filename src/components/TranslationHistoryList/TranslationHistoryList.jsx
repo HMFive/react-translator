@@ -1,13 +1,32 @@
 import Input from "../Input/Input";
-const TranslationHistoryList = ({ saved }) => {
+const TranslationHistoryList = ({
+  setTranslationHistory,
+  translationHistory,
+}) => {
+  const handleClick = () => {
+    localStorage.removeItem("saved");
+    setTranslationHistory([]);
+  };
+
   return (
     <div>
-      {saved.map((m) => (
-        <div>
-          <Input disabled={true} value={m.eng}></Input>
-          <Input disabled={true} value={m.tr}></Input>
+      <h3>Translation History</h3>
+      {translationHistory.map((t, index) => (
+        <div
+          style={{
+            borderBottom: "2px solid",
+            borderBottomColor: "#fabd2f",
+          }}
+          key={index}
+        >
+          <br />
+          <Input disabled={true} value={t.eng}></Input>
+          <br />
+          <Input disabled={true} value={t.tr}></Input>
         </div>
       ))}
+      <br />
+      <button onClick={() => handleClick()}>Clear History</button>
     </div>
   );
 };
