@@ -1,17 +1,17 @@
 import axiosInstance from "./axiosHelper";
 
 const translationService = {
-  translate: async (item) => {
+  translate: async (text) => {
     try {
       const response = await axiosInstance.post("translate", {
-        q: "another",
+        q: text,
         source: "en",
         target: "tr",
         api: "",
       });
       return response.data;
     } catch (error) {
-      console.error("Error fetching data", error);
+      console.error("Error", error);
       return null;
     }
   },
