@@ -1,8 +1,13 @@
+$text-area-bg-color: #32302f
+$text-area-border-color: #a89984
+$text-area-focus-border-color: #d79921
+
 textarea
   resize: none
-  border: 1px solid #a89984
+  border: 1px solid $text-area-border-color
   border-radius: 10px
-
+  background-color: $text-area-bg-color
+  padding: 10px
 textarea:focus
   outline: none !important
-  border-color: #d79921
+  border-color: $text-area-focus-border-color
