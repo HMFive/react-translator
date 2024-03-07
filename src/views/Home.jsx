@@ -1,17 +1,52 @@
 import { useState, useEffect } from "react";
 import translationService from "../service/translationService";
 import MicrophoneButton from "../components/MicrophoneButton/MicrophoneButton";
-import MicrophoneIcon from "../assets/microphone.svg";
 import Input from "../components/Input/Input";
 import TranslationHistoryList from "../components/TranslationHistoryList/TranslationHistoryList";
 const Home = () => {
-  const [trans, setTrans] = useState("");
+  const [translatedText, setTranslatedText] = useState("");
 
-  const [srcLang, setSrcLang] = useState("");
+  const [inputText, setInputText] = useState("");
 
-  const [saved, setSaved] = useState([]);
+  const [translationHistory, setTranslationHistory] = useState([]);
 
   const [isListening, setIsListening] = useState(false);
+
+  useEffect(() => {
+    const storedTranslationHistory =
+      JSON.parse(localStorage.getItem("translationHistory")) || [];
+    setTranslationHistory(storedTranslationHistory);
+  }, []);
+
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (inputText !== "") {
+        translationService.translate(inputText).then((fact) => {
+          setTranslatedText(fact.translatedText);
+          const translationHistoryText = {
+            eng: inputText,
+            tr: fact.translatedText,
+          };
+
+          setTranslationHistory((prevTranslationHistory) => [
+            ...prevTranslationHistory,
+            translationHistoryText,
+          ]);
+          localStorage.setItem(
+            "translationHistory",
+            JSON.stringify([...translationHistory, translationHistoryText])
+          );
+        });
+      }
+      localStorage.setItem(
+        "translationHistory",
+        JSON.stringify(translationHistory)
+      );
+    }, 2000);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [inputText]);
+
   const SpeechRecognition =
     window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -26,7 +61,7 @@ const Home = () => {
 
   recognition.onresult = (event) => {
     const voiceInput = event.results[0][0].transcript;
-    setSrcLang(voiceInput);
+    setInputText(voiceInput);
   };
 
   recognition.onspeechend = () => {
@@ -38,48 +73,35 @@ const Home = () => {
     setIsListening(false);
     console.log(`Error occurred in recognition: ${event.error}`);
   };
-  useEffect(() => {
-    console.log(srcLang);
-    const delayDebounceFn = setTimeout(() => {
-      if (srcLang !== "") {
-        translationService.translate(srcLang).then((fact) => {
-          console.log(fact);
-          setTrans(fact.translatedText);
-          const savedText = {
-            eng: srcLang,
-            tr: fact.translatedText,
-          };
-          setSaved([...saved, savedText]);
-        });
-      } else {
-        setTrans("");
-      }
-    }, 2000);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [srcLang]);
-
-  console.log(saved);
 
   return (
     <>
+      <p>English</p>
       <Input
         type="text"
         placeholder="Please speak or write in English"
-        value={srcLang}
-        setLang={setSrcLang}
+        value={inputText}
+        setLang={setInputText}
       ></Input>
+      <p>Turkish</p>
       <Input
         type="text"
         placeholder="Translation..."
-        value={trans}
+        value={translatedText}
         disabled={true}
       ></Input>
+      <br />
+      <br />
       <MicrophoneButton
         isListening={isListening}
         handleClick={handleMicrophoneClick}
       ></MicrophoneButton>
-      <TranslationHistoryList saved={saved}></TranslationHistoryList>
+      {translationHistory.length > 0 ? (
+        <TranslationHistoryList
+          setTranslationHistory={setTranslationHistory}
+          translationHistory={translationHistory}
+        ></TranslationHistoryList>
+      ) : null}
     </>
   );
 };
