@@ -1,4 +1,4 @@
-# React + Vite
+# React Translator
 
 https://react-translator-6181d.web.app/
 
